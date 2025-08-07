@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Welcome.</h1>
+
+<form id="search-form" method="get" class="mb-4">
+    <div class="input-group">
+        <input type="text" id="search_query" name="search_query" class="form-control rounded-pill" placeholder="Search for items..." style="border: none;">
+        <input type="text" id="location" name="location" class="form-control rounded-pill ms-2" placeholder="Location..." style="border: none;">
+        <button type="submit" class="btn btn-aesthetic rounded-pill ms-2">Search</button>
+    </div>
+</form>
+<p id="status_message"></p>
+
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 200px; object-fit: cover; border-radius: 15px 15px 0 0;">
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ product.title }}</h5>
+                <p class="card-text text-muted mb-1">{{ product.description|truncatechars:75 }}</p>
+                <p class="card-text mb-1"><strong>Price:</strong> ${{ product.price }}</p>
+                <p class="card-text mb-1"><strong>Location:</strong> {{ product.location }}</p>
+                <p class="card-text mb-1"><strong>Category:</strong> {{ product.category }}</p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>No thrifting items found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    if (navigator.geolocation) {
+        document.getElementById('status_message').innerText = 'Finding your location...';
+        navigator.geolocation.getCurrentPosition(successFunction, errorFunction);
+    } else {
+        document.getElementById('status_message').innerText = 'Geolocation is not supported by your browser.';
+    }
+
+    function successFunction(position) {
+        document.getElementById('status_message').innerText = 'Your location has been set.';
+    }
+
+    function errorFunction() {
+        document.getElementById('status_message').innerText = 'Unable to retrieve your location. Please enter it manually.';
+    }
+</script>
+{% endblock %}

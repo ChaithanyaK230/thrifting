@@ -1,28 +1,24 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-6">
-            {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.title }}" class="img-fluid rounded" style="object-fit: cover; max-height: 400px; width: 100%;">
-            {% endif %}
-        </div>
-        <div class="col-md-6">
-            <h1 class="display-4">{{ product.title }}</h1>
-            <p class="lead text-muted mb-4">{{ product.category }}</p>
-            <h2 class="display-5 text-aesthetic mb-3">₹{{ product.price }}</h2>
-            
-            <hr>
-            
-            <p><strong>Location:</strong> {{ product.location }}</p>
-            <p><strong>Description:</strong></p>
-            <p>{{ product.description }}</p>
-
-           
-
-            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary mt-4">Back to Listings</a>
-        </div>
+<div class="row">
+    <div class="col-md-6">
+        <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.title }}">
+    </div>
+    <div class="col-md-6">
+        <h2>
+            {{ product.title }}
+            <a href="{% url 'toggle_favorite' product.id %}">
+                {% if is_favorited %}
+                    <i class="fas fa-heart text-danger"></i>
+                {% else %}
+                    <i class="far fa-heart"></i>
+                {% endif %}
+            </a>
+        </h2>
+        <p class="text-muted">Category: {{ product.category }} | Location: {{ product.location }}</p>
+        <h3 class="mt-4">₹{{ product.price }}</h3>
+        <p class="mt-4">{{ product.description }}</p>
     </div>
 </div>
 {% endblock %}

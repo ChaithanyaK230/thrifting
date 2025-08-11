@@ -1,33 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="mb-4">Adding an item to Sell</h1>
+<h2>Sell an Item</h2>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="mb-3">
-        <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
-        {{ form.title }}
-    </div>
-    <div class="mb-3">
-        <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-        {{ form.description }}
-    </div>
-    <div class="mb-3">
-        <label for="{{ form.price.id_for_label }}" class="form-label">Price (₹)</label>
-        {{ form.price }}
-    </div>
-    <div class="mb-3">
-        <label for="{{ form.location.id_for_label }}" class="form-label">Location</label>
-        {{ form.location }}
-    </div>
-    <div class="mb-3">
-        <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
-        {{ form.category }}
-    </div>
-    <div class="mb-3">
-        <label for="{{ form.image.id_for_label }}" class="form-label">Image</label>
-        {{ form.image }}
-    </div>
-    <button type="submit" class="btn btn-aesthetic mt-3">Post Listing</button>
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Save</button>
 </form>
 {% endblock %}

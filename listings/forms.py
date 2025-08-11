@@ -1,9 +1,16 @@
-# thrifty/listings/forms.py
-
 from django import forms
-from .models import Product
+from .models import Listing
 
-class ProductForm(forms.ModelForm):
+class ListingForm(forms.ModelForm):
     class Meta:
-        model = Product
-        fields = ['title', 'description', 'price', 'location', 'image']
+        model = Listing
+        fields = ['title', 'description', 'price', 'location', 'category', 'image']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'location': forms.TextInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+

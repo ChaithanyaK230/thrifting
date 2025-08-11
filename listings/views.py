@@ -1,58 +1,87 @@
-# thrifty/listings/views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
+from django.conf import settings
+from .models import Listing, Favorite
+from .forms import ListingForm
+from django.contrib.auth.models import User 
 
-from django.shortcuts import render, redirect
-
-from .models import Product
-from .forms import ProductForm
-from django.db.models import Q
 
 def product_list(request):
     search_query = request.GET.get('search_query')
     location_query = request.GET.get('location')
+    category_query = request.GET.get('category')
 
-    products = Product.objects.all()
+    listings = Listing.objects.all()
 
     if search_query:
-        products = products.filter(
-            Q(title__icontains=search_query) |
-            Q(description__icontains=search_query) |
-            Q(category__icontains=search_query)
-        )
+        listings = listings.filter(title__icontains=search_query)
 
     if location_query:
-        products = products.filter(location__icontains=location_query)
+        listings = listings.filter(location__icontains=location_query)
+
+    if category_query:
+        listings = listings.filter(category=category_query)
+
+    # Get a list of favorited listing IDs for the current user
+    if request.user.is_authenticated:
+        favorited_listings = Favorite.objects.filter(user=request.user).values_list('listing_id', flat=True)
+    else:
+        favorited_listings = []
 
     context = {
-        'products': products
+        'products': listings,
+        'search_query': search_query or '',
+        'location_query': location_query or '',
+        'category_query': category_query or '',
+        'categories': Listing.CATEGORY_CHOICES,
+        'favorited_listings': favorited_listings,
     }
-    return render(request, 'listings/product_list.html', context)
+    return render(request, 'product_list.html', context)
 
-# The create_listing view remains the same
 def create_listing(request):
-    # ... (your existing create_listing code)
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        form = ListingForm(request.POST, request.FILES)
         if form.is_valid():
-            listing = form.save(commit=False)
-           
-            listing.save()
+            form.save()
             return redirect('product_list')
     else:
-        form = ProductForm()
+        form = ListingForm()
+    
+    return render(request, 'create_listing.html', {'form': form})
+
+
+def favorite_listing(request, listing_id):
+    listing = get_object_or_404(Listing, id=listing_id)
+    favorite, created = Favorite.objects.get_or_create(user=request.user, listing=listing)
+    
+    if not created:
+        # If the favorite already existed, delete it (un-favorite)
+        favorite.delete()
+    
+    return redirect('product_list')
+
+
+def favorite_list(request):
+    favorites = Favorite.objects.filter(user=request.user).select_related('listing')
+    return render(request, 'favorite_list.html', {'favorites': favorites})
+
+def product_detail(request, product_id):
+    product = get_object_or_404(Listing, id=product_id)
+    context = {
+        'product': product
+    }
+    return render(request, 'product_detail.html', context)
+
+def create_listing(request):
+    if request.method == 'POST':
+        form = ListingForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')
+    else:
+        form = ListingForm()
 
     context = {
         'form': form
     }
-    return render(request, 'listings/create_listing.html', context)
-
-def signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login') # Redirects to the login page after successful signup
-    else:
-        form = UserCreationForm()
-
-    context = {'form': form}
-    return render(request, 'registration/signup.html', context)
+    return render(request, 'create_listing.html', context)

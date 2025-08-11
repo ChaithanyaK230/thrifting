@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<form id="search-form" method="get" class="mb-4">
+    <div class="row g-2">
+        <div class="col-md-5">
+            <input type="text" id="search_query" name="search_query" class="form-control rounded-pill" placeholder="Search for items..." style="border: none;" value="{{ search_query }}">
+        </div>
+        <div class="col-md-3">
+            <select name="category" class="form-control rounded-pill" style="border: none;">
+                <option value="">All Categories</option>
+                {% for category, display_name in categories %}
+                    <option value="{{ category }}" {% if category == category_query %}selected{% endif %}>{{ display_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="text" id="location" name="location" class="form-control rounded-pill" placeholder="Location..." style="border: none;" value="{{ location_query }}">
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-aesthetic rounded-pill w-100">Search</button>
+        </div>
+    </div>
+</form>
+<p id="status_message"></p>
+
+<div class="row g-4">
+    {% for product in products %}
+    <div class="col-md-4 mb-4 d-flex">
+        <div class="card w-100">
+            <a href="{% url 'product_detail' product.id %}">
+                <div class="image-container">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
+                    {% endif %}
+                </div>
+            </a>
+            
+            <div class="card-body">
+                <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">
+                    <h5 class="card-title">{{ product.title }}</h5>
+                </a>
+                <p class="card-text text-muted mb-1">{{ product.description|truncatechars:75 }}</p>
+                <p class="card-text mb-1"><strong>Price:</strong> ₹{{ product.price }}</p>
+                <p class="card-text mb-1"><strong>Location:</strong> {{ product.location }}</p>
+                <p class="card-text mb-1"><strong>Category:</strong> {{ product.category }}</p>
+                
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'favorite_listing' product.id %}" class="btn mt-auto">
+                        {% if product.id in favorited_listings %}
+                            ❤️ Liked
+                        {% else %}
+                            🤍 Like
+                        {% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>No thrifting items found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    if (navigator.geolocation) {
+        document.getElementById('status_message').innerText = 'Finding your location...';
+        navigator.geolocation.getCurrentPosition(successFunction, errorFunction);
+    } else {
+        document.getElementById('status_message').innerText = 'Geolocation is not supported by your browser.';
+    }
+
+    function successFunction(position) {
+        document.getElementById('status_message').innerText = 'Your location has been set.';
+    }
+
+    function errorFunction() {
+        document.getElementById('status_message').innerText = 'Unable to retrieve your location. Please enter it manually.';
+    }
+</script>
+{% endblock %}
